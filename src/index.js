@@ -1,5 +1,10 @@
+import Observer from './observer';
+
 const PRVue = function(options = {}) {
-    console.log(123);
+    this.$options = options;
+    new Observer(this.$options.data);
+
+    this.data = this.$options.data;
 };
 
 window.PRVue = PRVue;

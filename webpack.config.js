@@ -33,5 +33,6 @@ module.exports = {
             }
         }),
         new Webpack.optimize.OccurenceOrderPlugin()
-    ]
+    ],
+    devtool: 'source-map'
 };

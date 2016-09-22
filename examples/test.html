@@ -5,6 +5,17 @@
     <title>test</title>
 </head>
 <body>
+    <div id="#app">
+        {{ a }}
+    </div>
     <script type="text/javascript" src="../dist/PRVue.js"></script>
+    <script>
+        var vm = new PRVue({
+            el: '#app',
+            data: {
+                a: 1
+            }
+        });
+    </script>
 </body>
 </html>

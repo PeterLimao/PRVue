@@ -1,31 +1,43 @@
-const observer = function(data) {
+import { Dep } from './dep';
+
+const Observe = function(data) {
     if (!data || typeof data !== 'object') {
-        console.error('data can\'t be null');
         return;
     }
 
-    this.data = data;
-
-    Object.keys(data).forEach((key) => {
-        this.defineProperty(key, data[key]);
-    });
+    new Observer(data);
 };
 
-observer.prototype.defineProperty = function(key, value) {
-    if (typeof value === 'object') {
-        observer(value);
+class Observer {
+    constructor(data) {
+        this.data = data;
+        this.start();
     }
 
-    Object.defineProperty(this.data, key, {
-        configurable: false,
-        enumerable: true,
-        get () {
-            return value;
-        },
-        set (newValue) {
-            value = newValue;
-        }
-    });
-};
+    start() {
+        Object.keys(this.data).forEach((key) => {
+            this.defineProperty(this.data, key, this.data[key]);
+        });
+    }
 
-export default observer;
+    defineProperty(data, key, value) {
+        let dep = new Dep();
+
+        Observe(value);
+
+        Object.defineProperty(data, key, {
+            configurable: false,
+            enumerable: true,
+            get () {
+                return value;
+            },
+            set (newValue) {
+                console.log('监听变化: value->' + value + ' newValue->' + newValue);
+                value = newValue;
+                dep.notify();
+            }
+        });
+    }
+}
+
+export { Observe };

@@ -1,10 +1,10 @@
-import Observer from './observer';
+var Observe = require('./observer').Observe;
 
-const PRVue = function(options = {}) {
+var PRVue = function(options) {
+    var options = options || {};
     this.$options = options;
-    new Observer(this.$options.data);
-
-    this.data = this.$options.data;
+    this.$data = this.$options.data;
+    Observe(this.$options.data);
 };
 
 window.PRVue = PRVue;

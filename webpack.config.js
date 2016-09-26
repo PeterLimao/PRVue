@@ -14,8 +14,8 @@ module.exports = {
         loaders: [
             {
                 test: /\.js$/,
-                loader: 'babel',
-                exclude: /node_modules/
+                exclude: /node_modules/,
+                loader: 'babel'
             }
         ]
     },
@@ -34,5 +34,5 @@ module.exports = {
         }),
         new Webpack.optimize.OccurenceOrderPlugin()
     ],
-    devtool: 'source-map'
+    devtool: '#source-map'
 };

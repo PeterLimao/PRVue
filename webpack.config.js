@@ -17,13 +17,6 @@ module.exports = {
         presets: ['es2015', 'stage-0'],
         plugins: ['transform-runtime']
     },
-    plugins: [
-        new Webpack.optimize.UglifyJsPlugin({
-            compress: {
-                warnings: false
-            }
-        }),
-        new Webpack.optimize.OccurenceOrderPlugin()
-    ],
-    devtool: 'source-map'
+    debug: true,
+    devtool: 'cheap-source-map'
 };

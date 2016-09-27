@@ -6,17 +6,9 @@
 </head>
 <body>
     <div id="app">
-        <ul>
-            <li>
-                {{ a.b }}
-            </li>
-            <li>
-                {{ a.c }}
-            </li>
-        </ul>
-        <ul>
-            <li>123</li>
-        </ul>
+        <div class="text">
+            {{ a.b.c }}
+        </div>
     </div>
     <script type="text/javascript" src="../dist/PRVue.js"></script>
     <script>
@@ -24,8 +16,9 @@
             el: '#app',
             data: {
                 a: {
-                    b: 1,
-                    c: 2
+                    b: {
+                        c: 1
+                    }
                 }
             }
         });

@@ -1,6 +1,6 @@
-import { Dep } from './dep';
+var Dep = require('./dep').Dep;
 
-const Observe = function(data) {
+var Observe = function(data) {
     if (!data || typeof data !== 'object') {
         return;
     }
@@ -8,36 +8,35 @@ const Observe = function(data) {
     new Observer(data);
 };
 
-class Observer {
-    constructor(data) {
-        this.data = data;
-        this.start();
-    }
+var Observer = function(data) {
+    this.data = data;
+    this.start();
+};
 
-    start() {
-        Object.keys(this.data).forEach((key) => {
-            this.defineProperty(this.data, key, this.data[key]);
-        });
-    }
+Observer.prototype.start = function() {
+    var _self = this;
+    Object.keys(this.data).forEach(function(key) {
+        _self.defineProperty(_self.data, key, _self.data[key]);
+    });
+};
 
-    defineProperty(data, key, value) {
-        let dep = new Dep();
+Observer.prototype.defineProperty = function(data, key, value) {
+    var dep = new Dep();
 
-        Observe(value);
+    Observe(value);
 
-        Object.defineProperty(data, key, {
-            configurable: false,
-            enumerable: true,
-            get () {
-                return value;
-            },
-            set (newValue) {
-                console.log('监听变化: value->' + value + ' newValue->' + newValue);
-                value = newValue;
-                dep.notify();
-            }
-        });
-    }
-}
+    Object.defineProperty(data, key, {
+        configurable: false,
+        enumerable: true,
+        get: function() {
+            return value;
+        },
+        set: function(newValue) {
+            console.log('监听变化: value->' + value + ' newValue->' + newValue);
+            value = newValue;
+            dep.notify();
+        }
+    });
+};
 
-export { Observe };
+exports.Observe = Observe;

@@ -1,24 +1,22 @@
-let uid = 0;
+var uid = 0;
 
-class Dep {
-    constructor() {
-        this.id = uid++;
-        this.subs = [];
-    }
+var Dep = function() {
+    this.id = uid++;
+    this.subs = [];
+};
 
-    addSub(sub) {
-        this.subs.push(sub);
-    }
+Dep.prototype.addSub = function (sub) {
+    this.subs.push(sub);
+};
 
-    removeSub(sub) {
-        if (this.subs.indexOf(sub) !== -1) this.subs.splice(index, 1);
-    }
+Dep.prototype.removeSub = function(sub) {
+    if (this.subs.indexOf(sub) !== -1) this.subs.splice(index, 1);
+};
 
-    notify() {
-        this.subs.forEach((sub) => {
-            sub.update();
-        });
-    }
-}
+Dep.prototype.notify = function() {
+    this.subs.forEach(function(sub) {
+        sub.update();
+    });
+};
 
-export { Dep };
+exports.Dep = Dep;

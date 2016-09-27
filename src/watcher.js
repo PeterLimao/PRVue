@@ -1,3 +1,1 @@
-class Watcher {
-
-};
+var Watcher = function() {};

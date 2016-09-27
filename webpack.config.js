@@ -10,15 +10,6 @@ module.exports = {
         filename: '[name].js',
         chunkFilename: '[name].js'
     },
-    module: {
-        loaders: [
-            {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                loader: 'babel'
-            }
-        ]
-    },
     resolve: {
         extensions: ['', '.js'],
     },
@@ -34,5 +25,5 @@ module.exports = {
         }),
         new Webpack.optimize.OccurenceOrderPlugin()
     ],
-    devtool: '#source-map'
+    devtool: 'source-map'
 };

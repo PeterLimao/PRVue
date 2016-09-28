@@ -6,8 +6,8 @@
 </head>
 <body>
     <div id="app">
-        <div class="text">
-            {{ a.b.c }}
+        <div>
+            {{ a }}
         </div>
     </div>
     <script type="text/javascript" src="../dist/PRVue.js"></script>
@@ -15,11 +15,7 @@
         var vm = new PRVue({
             el: '#app',
             data: {
-                a: {
-                    b: {
-                        c: 1
-                    }
-                }
+                a: 'hello world'
             }
         });
     </script>

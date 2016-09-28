@@ -5,7 +5,7 @@ var Observe = function(data) {
         return;
     }
 
-    new Observer(data);
+    return new Observer(data);
 };
 
 var Observer = function(data) {
@@ -29,12 +29,14 @@ Observer.prototype.defineProperty = function(data, key, value) {
         configurable: false,
         enumerable: true,
         get: function() {
+            if (Dep.target) dep.depend();
             return value;
         },
         set: function(newValue) {
-            console.log('监听变化: value->' + value + ' newValue->' + newValue);
             value = newValue;
             dep.notify();
+            //如果newValue是一个新的Object, 则需要进行转化
+            Observe(newValue);
         }
     });
 };

@@ -6,8 +6,8 @@ var Compile = require('./compile').Compile;
  * @param  {Object} options [实例参数]
  */
 var PRVue = function(options) {
-    this.$options = options || {};
-    var data = this.$data = this.$options.data;
+    this.options = options || {};
+    var data = this.data = this.options.data;
 
     var _self = this;
     Object.keys(data).forEach(function(key) {
@@ -16,7 +16,7 @@ var PRVue = function(options) {
     //创建Obsever实例
     Observe(data);
     //创建Compiler实例
-    new Compile(this.$options.el, this);
+    new Compile(this.options.el, this);
 };
 
 /**
@@ -29,10 +29,10 @@ PRVue.prototype.proxy = function(key) {
         configurable: false,
         enumerable: true,
         get: function() {
-            return this.$data[key];
+            return this.data[key];
         },
         set: function(newValue) {
-            this.$data[key] = newValue;
+            this.data[key] = newValue;
         }
     })
 };

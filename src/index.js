@@ -9,6 +9,7 @@ var PRVue = function(options) {
     this.options = options || {};
     var data = this.data = this.options.data;
 
+    //代理vm.data.xxx, 便于用vm.xxxx访问
     var _self = this;
     Object.keys(data).forEach(function(key) {
         _self.proxy(key);
@@ -19,12 +20,14 @@ var PRVue = function(options) {
     new Compile(this.options.el, this);
 };
 
+var p = PRVue.prototype;
+
 /**
  * vm.$data的代理方法,通过vm.x来访问vm.$data.x
  * @param  {[type]} key [description]
  * @return {[type]}     [description]
  */
-PRVue.prototype.proxy = function(key) {
+p.proxy = function(key) {
     Object.defineProperty(this, key, {
         configurable: false,
         enumerable: true,

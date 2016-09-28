@@ -1,28 +1,48 @@
 var Dep = require('./dep').Dep;
 
+/**
+ * observe入口, 验证data数据，并创建实例
+ * @param  {Object} data
+ */
 var Observe = function(data) {
     if (!data || typeof data !== 'object') {
         return;
     }
-
-    return new Observer(data);
+    new Observer(data);
 };
 
+/**
+ * Observer实例的构造方法, 绑定需要订阅的data, 并执行逻辑
+ * @param  {Object} data
+ */
 var Observer = function(data) {
     this.data = data;
     this.start();
 };
 
-Observer.prototype.start = function() {
+var p = Observer.prototype;
+
+/**
+ * 枚举data属性, 转化为getter, setter
+ */
+p.start = function() {
     var _self = this;
     Object.keys(this.data).forEach(function(key) {
         _self.defineProperty(_self.data, key, _self.data[key]);
     });
 };
 
-Observer.prototype.defineProperty = function(data, key, value) {
+/**
+ * getter, setter转化方法, 并对应一个deps实例
+ * get触发时候添加一个Watcher到deps
+ * set触发时候通知deps的Watcher有数据更新
+ * @param  {Object} data
+ * @param  {String} key
+ * @param  {String or Object} value
+ */
+p.defineProperty = function(data, key, value) {
     var dep = new Dep();
-
+    //判断value是否是object,如果也是，递归处理，转化成getter, setter
     Observe(value);
 
     Object.defineProperty(data, key, {
@@ -35,7 +55,7 @@ Observer.prototype.defineProperty = function(data, key, value) {
         set: function(newValue) {
             value = newValue;
             dep.notify();
-            //如果newValue是一个新的Object, 则需要进行转化
+            //如果newValue是一个新的Object, 则需要转化为getter, setter
             Observe(newValue);
         }
     });

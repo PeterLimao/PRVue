@@ -5,6 +5,7 @@ var Compile = function(el, vm) {
     this.vm = vm;
     this.el = this.isElementNode(el) ? el : document.querySelector(el);
 
+    //将el转化为document fragment, 并解析模板(目前只解析了文本节点)
     if (this.el) {
         this.fragment = this.nodeToFragment(this.el);
         this.init();
@@ -12,11 +13,13 @@ var Compile = function(el, vm) {
     }
 };
 
-Compile.prototype.init = function() {
+var p = Compile.prototype;
+
+p.init = function() {
     this.compileElement(this.fragment);
 };
 
-Compile.prototype.compileElement = function(el) {
+p.compileElement = function(el) {
     var childNodes = el.childNodes;
     var _self = this;
     [].forEach.call(childNodes, function(node) {
@@ -34,11 +37,11 @@ Compile.prototype.compileElement = function(el) {
     });
 };
 
-Compile.prototype.compileText = function(node, exp) {
+p.compileText = function(node, exp) {
     CompileUtil.text(this.vm, node, exp);
 };
 
-Compile.prototype.nodeToFragment = function(node) {
+P.nodeToFragment = function(node) {
     var fragment = document.createDocumentFragment(), child;
 
     while (child = node.firstChild) {
@@ -48,11 +51,11 @@ Compile.prototype.nodeToFragment = function(node) {
     return fragment;
 };
 
-Compile.prototype.isElementNode = function(node) {
+p.isElementNode = function(node) {
     return node.nodeType === 1;
 };
 
-Compile.prototype.isTextNode = function(node) {
+p.isTextNode = function(node) {
     return node.nodeType === 3;
 }
 

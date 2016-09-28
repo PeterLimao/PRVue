@@ -8,7 +8,9 @@ var Watcher = function(vm, exp, callback) {
     this.value = this.get();
 };
 
-Watcher.prototype.update = function() {
+var p = Watcher.prototype;
+
+p.update = function() {
     var newValue = this.get();
     var oldValue = this.value;
     if (newValue !== oldValue) {
@@ -17,14 +19,14 @@ Watcher.prototype.update = function() {
     }
 };
 
-Watcher.prototype.addDep = function(dep) {
+p.addDep = function(dep) {
     if (this.depId !== dep.id) {
         dep.addSub(this);
         this.depId = dep.id;
     }
 }
 
-Watcher.prototype.get = function() {
+p.get = function() {
     Dep.target = this;
     var value = this.getVmVal();
     Dep.target = null;
@@ -32,7 +34,7 @@ Watcher.prototype.get = function() {
     return value;
 };
 
-Watcher.prototype.getVmVal = function() {
+p.getVmVal = function() {
     var data = this.vm.data;
     var exps = this.exp.split('.');
 

@@ -3,3 +3,6 @@
 
 ## 图1
 ![img](https://github.com/PeterLimao/PRVue/raw/master/img/mvvm.png)
+
+## 图２
+![img](https://github.com/PeterLimao/PRVue/raw/master/img/rl.png)

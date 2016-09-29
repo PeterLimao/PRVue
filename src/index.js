@@ -15,7 +15,7 @@ var PRVue = function(options) {
         _self.proxy(key);
     });
     //创建Obsever实例
-    Observe(data);
+    Observe(this.data);
     //创建Compiler实例
     new Compile(this.options.el, this);
 };

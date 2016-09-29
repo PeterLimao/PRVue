@@ -62,22 +62,25 @@
 	    this.options = options || {};
 	    var data = this.data = this.options.data;
 
+	    //代理vm.data.xxx, 便于用vm.xxxx访问
 	    var _self = this;
 	    Object.keys(data).forEach(function(key) {
 	        _self.proxy(key);
 	    });
 	    //创建Obsever实例
-	    Observe(data);
+	    Observe(this.data);
 	    //创建Compiler实例
 	    new Compile(this.options.el, this);
 	};
+
+	var p = PRVue.prototype;
 
 	/**
 	 * vm.$data的代理方法,通过vm.x来访问vm.$data.x
 	 * @param  {[type]} key [description]
 	 * @return {[type]}     [description]
 	 */
-	PRVue.prototype.proxy = function(key) {
+	p.proxy = function(key) {
 	    Object.defineProperty(this, key, {
 	        configurable: false,
 	        enumerable: true,
@@ -99,43 +102,67 @@
 
 	var Dep = __webpack_require__(3).Dep;
 
+	/**
+	 * observe入口, 验证data数据，并创建实例
+	 * @param  {Object} data
+	 */
 	var Observe = function(data) {
 	    if (!data || typeof data !== 'object') {
 	        return;
 	    }
-
-	    return new Observer(data);
+	    new Observer(data);
 	};
 
+	/**
+	 * Observer实例的构造方法, 绑定需要订阅的data, 并执行逻辑
+	 * @param  {Object} data
+	 */
 	var Observer = function(data) {
 	    this.data = data;
+	    this.dep = new Dep();
 	    this.start();
 	};
 
-	Observer.prototype.start = function() {
+	var p = Observer.prototype;
+
+	/**
+	 * 枚举data属性, 转化为getter, setter
+	 */
+	p.start = function() {
 	    var _self = this;
 	    Object.keys(this.data).forEach(function(key) {
 	        _self.defineProperty(_self.data, key, _self.data[key]);
 	    });
 	};
 
-	Observer.prototype.defineProperty = function(data, key, value) {
-	    var dep = new Dep();
-
+	/**
+	 * getter, setter转化方法, 并对应一个deps实例
+	 * get触发时候添加一个Watcher到deps
+	 * set触发时候通知deps的Watcher有数据更新
+	 * @param  {Object} data
+	 * @param  {String} key
+	 * @param  {String or Object} value
+	 */
+	p.defineProperty = function(data, key, value) {
+	    //判断value是否是object,如果也是，递归处理，转化成getter, setter
 	    Observe(value);
+
+	    var _self = this;
 
 	    Object.defineProperty(data, key, {
 	        configurable: false,
 	        enumerable: true,
 	        get: function() {
-	            if (Dep.target) dep.depend();
+	            //只有当watcher被实例化后，才能push Watcher
+	            if (Dep.target) _self.dep.depend();
 	            return value;
 	        },
 	        set: function(newValue) {
-	            value = newValue;
-	            dep.notify();
-	            //如果newValue是一个新的Object, 则需要进行转化
+	            _self.dep.notify();
+	            //如果newValue是一个新的Object, 则需要转化为getter, setter
 	            Observe(newValue);
+
+	            value = newValue;
 	        }
 	    });
 	};
@@ -154,19 +181,22 @@
 	    this.subs = [];
 	};
 
-	Dep.prototype.addSub = function (sub) {
+	var p = Dep.prototype;
+
+	p.addSub = function (sub) {
 	    this.subs.push(sub);
 	};
 
-	Dep.prototype.removeSub = function(sub) {
+	p.removeSub = function(sub) {
 	    if (this.subs.indexOf(sub) !== -1) this.subs.splice(index, 1);
 	};
 
-	Dep.prototype.depend = function() {
+	p.depend = function() {
 	    Dep.target.addDep(this);
+	    console.log('id: ' + this.id);
 	}
 
-	Dep.prototype.notify = function() {
+	p.notify = function() {
 	    this.subs.forEach(function(sub) {
 	        sub.update();
 	    });
@@ -182,10 +212,16 @@
 	var Updater = __webpack_require__(5).Updater;
 	var Watcher = __webpack_require__(6).Watcher;
 
+	/**
+	 * Complie入口，初始化Complie实例，绑定vm和el
+	 * @param  {String} el 模板id (#app)
+	 * @param  {vm} vm PRVue实例
+	 */
 	var Compile = function(el, vm) {
 	    this.vm = vm;
 	    this.el = this.isElementNode(el) ? el : document.querySelector(el);
 
+	    //将el转化为document fragment, 并解析模板(目前只解析了文本节点)
 	    if (this.el) {
 	        this.fragment = this.nodeToFragment(this.el);
 	        this.init();
@@ -193,11 +229,30 @@
 	    }
 	};
 
-	Compile.prototype.init = function() {
+	var p = Compile.prototype;
+
+	/**
+	 * 初始化，解析document fragment
+	 */
+	p.init = function() {
 	    this.compileElement(this.fragment);
 	};
 
-	Compile.prototype.compileElement = function(el) {
+	p.nodeToFragment = function(node) {
+	    var fragment = document.createDocumentFragment(), child;
+
+	    while (child = node.firstChild) {
+	        fragment.appendChild(child);
+	    }
+
+	    return fragment;
+	};
+
+	/**
+	 * 递归解析document fragment 并且为每个文本节点({{ }})实例化watcher, 并且初始化文本节点数据
+	 * @param  {Object} el
+	 */
+	p.compileElement = function(el) {
 	    var childNodes = el.childNodes;
 	    var _self = this;
 	    [].forEach.call(childNodes, function(node) {
@@ -215,25 +270,15 @@
 	    });
 	};
 
-	Compile.prototype.compileText = function(node, exp) {
+	p.compileText = function(node, exp) {
 	    CompileUtil.text(this.vm, node, exp);
 	};
 
-	Compile.prototype.nodeToFragment = function(node) {
-	    var fragment = document.createDocumentFragment(), child;
-
-	    while (child = node.firstChild) {
-	        fragment.appendChild(child);
-	    }
-
-	    return fragment;
-	};
-
-	Compile.prototype.isElementNode = function(node) {
+	p.isElementNode = function(node) {
 	    return node.nodeType === 1;
 	};
 
-	Compile.prototype.isTextNode = function(node) {
+	p.isTextNode = function(node) {
 	    return node.nodeType === 3;
 	}
 
@@ -284,15 +329,23 @@
 
 	var Dep = __webpack_require__(3).Dep;
 
+	/**
+	 * Watcher实例入口,
+	 * @param  {Object}   vm       对应的PRVue实例
+	 * @param  {String}   exp      表达式 {{a.b.c}}
+	 * @param  {Function} callback 回调函数，用于触发数据更新
+	 */
 	var Watcher = function(vm, exp, callback) {
 	    this.vm = vm;
 	    this.exp = exp;
 	    this.callback = callback;
-	    this.depId;
+	    this.depsId = {};
 	    this.value = this.get();
 	};
 
-	Watcher.prototype.update = function() {
+	var p = Watcher.prototype;
+
+	p.update = function() {
 	    var newValue = this.get();
 	    var oldValue = this.value;
 	    if (newValue !== oldValue) {
@@ -301,14 +354,18 @@
 	    }
 	};
 
-	Watcher.prototype.addDep = function(dep) {
-	    if (this.depId !== dep.id) {
+	p.addDep = function(dep) {
+	    if (!this.depsId.hasOwnProperty(dep.id)) {
 	        dep.addSub(this);
-	        this.depId = dep.id;
+	        this.depsId[dep.id] = dep;
 	    }
 	}
 
-	Watcher.prototype.get = function() {
+	/**
+	 * 获取需要watch的数据, 并让dep持有watcher实例的引用，方便dep push watcher
+	 * @return {String} 值
+	 */
+	p.get = function() {
 	    Dep.target = this;
 	    var value = this.getVmVal();
 	    Dep.target = null;
@@ -316,7 +373,11 @@
 	    return value;
 	};
 
-	Watcher.prototype.getVmVal = function() {
+	/**
+	 * 递归exp, 取得value, 并触发getter, push watcher
+	 * @return {data} 值
+	 */
+	p.getVmVal = function() {
 	    var data = this.vm.data;
 	    var exps = this.exp.split('.');
 

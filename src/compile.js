@@ -1,6 +1,11 @@
 var Updater = require('./updater').Updater;
 var Watcher = require('./watcher').Watcher;
 
+/**
+ * Complie入口，初始化Complie实例，绑定vm和el
+ * @param  {String} el 模板id (#app)
+ * @param  {vm} vm PRVue实例
+ */
 var Compile = function(el, vm) {
     this.vm = vm;
     this.el = this.isElementNode(el) ? el : document.querySelector(el);
@@ -15,10 +20,27 @@ var Compile = function(el, vm) {
 
 var p = Compile.prototype;
 
+/**
+ * 初始化，解析document fragment
+ */
 p.init = function() {
     this.compileElement(this.fragment);
 };
 
+p.nodeToFragment = function(node) {
+    var fragment = document.createDocumentFragment(), child;
+
+    while (child = node.firstChild) {
+        fragment.appendChild(child);
+    }
+
+    return fragment;
+};
+
+/**
+ * 递归解析document fragment 并且为每个文本节点({{ }})实例化watcher, 并且初始化文本节点数据
+ * @param  {Object} el
+ */
 p.compileElement = function(el) {
     var childNodes = el.childNodes;
     var _self = this;
@@ -39,16 +61,6 @@ p.compileElement = function(el) {
 
 p.compileText = function(node, exp) {
     CompileUtil.text(this.vm, node, exp);
-};
-
-P.nodeToFragment = function(node) {
-    var fragment = document.createDocumentFragment(), child;
-
-    while (child = node.firstChild) {
-        fragment.appendChild(child);
-    }
-
-    return fragment;
 };
 
 p.isElementNode = function(node) {

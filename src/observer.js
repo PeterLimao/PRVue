@@ -17,6 +17,7 @@ var Observe = function(data) {
  */
 var Observer = function(data) {
     this.data = data;
+    this.dep = new Dep();
     this.start();
 };
 
@@ -41,22 +42,25 @@ p.start = function() {
  * @param  {String or Object} value
  */
 p.defineProperty = function(data, key, value) {
-    var dep = new Dep();
     //判断value是否是object,如果也是，递归处理，转化成getter, setter
     Observe(value);
+
+    var _self = this;
 
     Object.defineProperty(data, key, {
         configurable: false,
         enumerable: true,
         get: function() {
-            if (Dep.target) dep.depend();
+            //只有当watcher被实例化后，才能push Watcher
+            if (Dep.target) _self.dep.depend();
             return value;
         },
         set: function(newValue) {
-            value = newValue;
-            dep.notify();
+            _self.dep.notify();
             //如果newValue是一个新的Object, 则需要转化为getter, setter
             Observe(newValue);
+
+            value = newValue;
         }
     });
 };
